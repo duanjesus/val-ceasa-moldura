@@ -14,7 +14,7 @@ landing page publicada no GitHub Pages, com um card para cada app.
 | pasta | status | descrição |
 |---|---|---|
 | [`apps/perfil`](apps/perfil) | pronto | moldura de foto de perfil (WhatsApp, Instagram, Facebook) |
-| story | planejado | moldura para stories |
+| [`apps/story`](apps/story) | pronto | moldura para stories do Instagram e Facebook |
 | capa-facebook | planejado | capa de perfil no Facebook |
 | santinho | planejado | material impresso |
 
@@ -31,4 +31,4 @@ políticas.
 1. Detecção de rosto para enquadramento automático em `apps/perfil`
 2. Botão de compartilhar via Web Share API
 3. Pedir o logo vetorial original à campanha
-4. Construir os apps de story, capa de Facebook e santinho
+4. Construir os apps de capa de Facebook e santinho
