@@ -1,16 +1,22 @@
-# Moldura de perfil — Val Ceasa 25888
+# Materiais de campanha — Val Ceasa 25888
 
-Gerador de foto de perfil com moldura da campanha de Val Ceasa, candidato à
-reeleição a deputado estadual pelo Rio de Janeiro (número 25888).
+Monorepo de peças gráficas para a campanha de Val Ceasa, candidato à
+reeleição a deputado estadual pelo Rio de Janeiro (número 25888). Primeiro
+turno em 4 de outubro de 2026.
 
-Página estática, sem back-end. Tudo processado no navegador do apoiador: a
-foto nunca sai do dispositivo. As duas artes da moldura (versão com selo "EU
-APOIO!" e versão enxuta) estão embutidas em base64 dentro do próprio HTML.
+Cada peça é uma página estática autocontida, sem back-end e sem build step:
+abre direto no navegador, todo o processamento acontece no dispositivo do
+apoiador, nenhuma foto ou dado sai da máquina. `index.html` na raiz é a
+landing page publicada no GitHub Pages, com um card para cada app.
 
-## Uso
+## Apps
 
-Abrir [`index.html`](index.html) direto no navegador, ou publicar como site
-estático (GitHub Pages, Netlify, etc.).
+| pasta | status | descrição |
+|---|---|---|
+| [`apps/perfil`](apps/perfil) | pronto | moldura de foto de perfil (WhatsApp, Instagram, Facebook) |
+| story | planejado | moldura para stories |
+| capa-facebook | planejado | capa de perfil no Facebook |
+| santinho | planejado | material impresso |
 
 ## Contexto e decisões de projeto
 
@@ -22,7 +28,7 @@ políticas.
 
 ## Próximos passos
 
-1. Detecção de rosto para enquadramento automático
+1. Detecção de rosto para enquadramento automático em `apps/perfil`
 2. Botão de compartilhar via Web Share API
 3. Pedir o logo vetorial original à campanha
-4. Estender a identidade para story, capa de Facebook e santinho
+4. Construir os apps de story, capa de Facebook e santinho
