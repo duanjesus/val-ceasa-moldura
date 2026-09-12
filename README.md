@@ -28,7 +28,5 @@ políticas.
 
 ## Próximos passos
 
-1. Detecção de rosto para enquadramento automático em `apps/perfil`
-2. Botão de compartilhar via Web Share API
-3. Pedir o logo vetorial original à campanha
-4. Construir os apps de capa de Facebook e santinho
+1. Pedir o logo vetorial original à campanha
+2. Construir os apps de capa de Facebook e santinho

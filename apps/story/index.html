@@ -45,6 +45,7 @@
        font-size:16px;font-weight:700;cursor:pointer;background:var(--yellow);color:var(--navy-d)}
   .btn[disabled]{background:#E7EAF1;color:#9AA2B1;cursor:not-allowed}
   .btn.ghost{background:transparent;color:var(--navy);border:1px solid var(--line);margin-top:10px;font-size:14px}
+  .btn[hidden]{display:none}
   .hint{font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center}
   .warn{display:none;margin-top:14px;background:#FFF8E1;border:1px solid #F2DFA0;border-radius:10px;
         padding:10px 12px;font-size:12.5px;color:#7A5B0B}
@@ -90,6 +91,7 @@
         <div class="warn" id="warn"></div>
 
         <button class="btn" id="dl" disabled>Baixar story</button>
+        <button class="btn ghost" id="share" disabled hidden>Compartilhar</button>
         <button class="btn ghost" id="reset">Recomeçar</button>
       </div>
     </div>
@@ -108,6 +110,7 @@ const fileIn = document.getElementById('file');
 const drop  = document.getElementById('drop');
 const zoom  = document.getElementById('zoom');
 const dl    = document.getElementById('dl');
+const share = document.getElementById('share');
 const optA  = document.getElementById('optA');
 const optB  = document.getElementById('optB');
 const warn  = document.getElementById('warn');
@@ -138,6 +141,13 @@ const VIEW_H = Math.round(VIEW_W * H / W);
 view.width = VIEW_W; view.height = VIEW_H;
 
 function hq(c){ c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high'; return c; }
+
+/* so mostra o botao de compartilhar em navegadores que sabem
+   compartilhar arquivo (webshare com files), tipo celular */
+try {
+  const probe = new File([new Blob(['x'])], 'x.png', { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [probe] })) share.hidden = false;
+} catch (e) {}
 
 function loadFrames(cb){
   let n = 0;
@@ -221,11 +231,45 @@ function read(f){
     const i = new Image();
     i.onload = () => {
       img = i; cache.clear(); zoom.value = 100;
-      fit(); dl.disabled = false; checkRes(); render();
+      fit(); dl.disabled = false; share.disabled = false; checkRes(); render();
+      autoCenterFace();
     };
     i.src = fr.result;
   };
   fr.readAsDataURL(f);
+}
+
+/* tenta centralizar o rosto sozinho; se o navegador nao souber detectar
+   rosto (so Chrome/Edge/Android por enquanto) ou nao achar nenhum,
+   fica no enquadramento central de sempre - a pessoa ainda pode arrastar */
+async function autoCenterFace(){
+  if (!('FaceDetector' in window) || !img) return;
+  try {
+    const detector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
+    const faces = await detector.detect(img);
+    if (!faces.length) return;
+    const box = faces[0].boundingBox;
+    const fx = box.x + box.width / 2, fy = box.y + box.height / 2;
+
+    /* da uma folga de zoom pra poder deslocar a foto sem deixar vao nas bordas */
+    zoom.value = 130;
+    scale = base * 1.3;
+    const w = img.width * scale, h = img.height * scale;
+
+    /* alvo: parte de cima do story, deixando ombro/peito abaixo antes
+       da faixa e do selo que ficam perto do rodape */
+    const targetX = W / 2, targetY = H * 0.34;
+    const wantOx = targetX - W/2 + w/2 - fx*scale;
+    const wantOy = targetY - H/2 + h/2 - fy*scale;
+
+    const maxOx = (w - W) / 2, maxOy = (h - H) / 2;
+    ox = Math.max(-maxOx, Math.min(maxOx, wantOx));
+    oy = Math.max(-maxOy, Math.min(maxOy, wantOy));
+
+    checkRes(); render();
+  } catch (err) {
+    console.warn('deteccao de rosto indisponivel', err);
+  }
 }
 
 zoom.addEventListener('input', () => {
@@ -261,7 +305,7 @@ optB.onclick = () => pick('b');
 document.getElementById('reset').onclick = () => {
   img = null; cache.clear(); fileIn.value = '';
   zoom.value = 100; ox = oy = 0; nome.value = ''; atualizaNome();
-  dl.disabled = true; warn.classList.remove('on'); render();
+  dl.disabled = true; share.disabled = true; warn.classList.remove('on'); render();
 };
 
 dl.onclick = () => {
@@ -276,6 +320,19 @@ dl.onclick = () => {
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
   }, 'image/png');
+};
+
+share.onclick = async () => {
+  const out = document.createElement('canvas');
+  out.width = W; out.height = H;
+  draw(out, W, true);
+  const blob = await new Promise(res => out.toBlob(res, 'image/png'));
+  const file = new File([blob], nomeArquivo(), { type: 'image/png' });
+  try {
+    await navigator.share({ files: [file], title: 'Val Ceasa 25888' });
+  } catch (err) {
+    if (err.name !== 'AbortError') console.error(err);
+  }
 };
 
 loadFrames(render);
